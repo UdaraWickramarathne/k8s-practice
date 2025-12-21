@@ -2,6 +2,14 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { createClient, RedisClientType } from "redis";
 
+// Load .env in development if dotenv is installed; ignore if not present
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('dotenv').config();
+} catch (_) {
+  // dotenv not installed or no .env file — fine, proceed using process.env
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
