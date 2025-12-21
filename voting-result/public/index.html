@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Voting Results</title>
+    <style>
+      body { font-family: system-ui, Arial, sans-serif; display:flex; flex-direction:column; align-items:center; padding:24px; }
+      #chart-container { width: 80%; max-width:600px; }
+      #emptyState { display:none; width:100%; max-width:600px; text-align:center; padding:48px 0; }
+      .pulse { width:96px; height:96px; margin:0 auto 12px auto; border-radius:50%; background:linear-gradient(135deg,#e0e7ff,#fce7f3); box-shadow:0 8px 24px rgba(0,0,0,0.08); animation:pulse 1.4s infinite; }
+      @keyframes pulse { 0% { transform:scale(1); opacity:1 } 50% { transform:scale(1.08); opacity:0.85 } 100% { transform:scale(1); opacity:1 } }
+      #meta { margin-top:12px; color:#555 }
+      button { margin-top:12px; padding:8px 12px; }
+    </style>
+  </head>
+  <body>
+    <h1>Voting Results</h1>
+    <div id="chart-container">
+      <canvas id="votesChart" width="400" height="400"></canvas>
+    </div>
+    <div id="emptyState">
+      <div class="pulse" aria-hidden="true"></div>
+      <div style="font-size:18px; color:#334155">No votes yet — waiting for the first vote…</div>
+      <div style="margin-top:8px; color:#64748b; font-size:13px">The chart will appear here when votes are recorded.</div>
+    </div>
+    <div id="meta">Source: <code>/api/votes/counts</code></div>
+    <button id="refresh">Refresh</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script>
+      // Register the datalabels plugin so charts can show labels inside slices
+      if (window.Chart && window.ChartDataLabels) {
+        Chart.register(ChartDataLabels);
+      }
+      const ctx = document.getElementById('votesChart').getContext('2d');
+      let chart;
+
+      async function fetchCounts() {
+        try {
+          const res = await fetch('/api/votes/counts');
+          if (!res.ok) throw new Error('Network response not ok');
+          return await res.json();
+        } catch (err) {
+          console.error(err);
+          return { cat: 0, dog: 0 };
+        }
+      }
+
+      function updateChartData(data) {
+        const [catCount, dogCount] = data;
+
+        // Show empty state when both counts are zero
+        const isEmpty = (catCount || 0) === 0 && (dogCount || 0) === 0;
+        const chartContainer = document.getElementById('chart-container');
+        const emptyState = document.getElementById('emptyState');
+        if (isEmpty) {
+          chartContainer.style.display = 'none';
+          emptyState.style.display = 'block';
+          return;
+        } else {
+          chartContainer.style.display = '';
+          emptyState.style.display = 'none';
+        }
+
+        const cfg = {
+          type: 'pie',
+          data: {
+            labels: ['Cat', 'Dog'],
+            datasets: [{ data: [catCount, dogCount], backgroundColor: ['#36A2EB', '#FF6384'] }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              datalabels: {
+                color: '#fff',
+                anchor: 'center',
+                align: 'center',
+                formatter: (value, ctx) => {
+                  const data = ctx.chart.data.datasets[0].data;
+                  const sum = data.reduce((a, b) => a + b, 0) || 0;
+                  if (!sum) return '';
+                  const pct = Math.round((value / sum) * 100);
+                  return pct + '%';
+                },
+                font: { weight: '600' }
+              }
+            }
+          }
+        };
+
+        if (chart) {
+          chart.data.datasets[0].data = [catCount, dogCount];
+          chart.update();
+        } else {
+          chart = new Chart(ctx, cfg);
+        }
+      }
+
+      async function render() {
+        const counts = await fetchCounts();
+        updateChartData([counts.cat || 0, counts.dog || 0]);
+      }
+
+      document.getElementById('refresh').addEventListener('click', render);
+
+      // initial render
+      render();
+
+      // Replace polling with Server-Sent Events (SSE) for real-time updates
+      const es = new EventSource('/events');
+      es.addEventListener('counts', e => {
+        try {
+          const counts = JSON.parse(e.data);
+          updateChartData([counts.cat || 0, counts.dog || 0]);
+        } catch (err) {
+          console.error('Invalid SSE counts payload', err);
+        }
+      });
+
+      es.onerror = (err) => {
+        console.warn('SSE connection error', err);
+      };
+    </script>
+  </body>
+</html>

@@ -7,6 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 // Register MVC controllers so attribute-routed controllers work
 builder.Services.AddControllers();
+// Add CORS policy for local frontend during development
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalDev", policy =>
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
 // Bind the app to specific URLs (HTTP and HTTPS)
 builder.WebHost.UseUrls("http://localhost:5000","https://localhost:5001");
 
@@ -23,7 +31,17 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// Ensure routing is enabled so CORS middleware can run with endpoint routing
+app.UseRouting();
+
+// Enable CORS before HTTPS redirection so preflight requests are handled
+app.UseCors("AllowLocalDev");
+
+// Only redirect to HTTPS in production to avoid CORS preflight issues in dev
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // Map controller routes (attribute routing)
 app.MapControllers();

@@ -32,3 +32,4 @@ D:\Programming\k8s-practice\voting-service\obj\Debug\net9.0\voting-service.genru
 D:\Programming\k8s-practice\voting-service\obj\Debug\net9.0\ref\voting-service.dll
 D:\Programming\k8s-practice\voting-service\bin\Debug\net9.0\Pipelines.Sockets.Unofficial.dll
 D:\Programming\k8s-practice\voting-service\bin\Debug\net9.0\StackExchange.Redis.dll
+D:\Programming\k8s-practice\voting-service\obj\Debug\net9.0\voting-service.sourcelink.json
