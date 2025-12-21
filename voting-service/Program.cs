@@ -15,8 +15,10 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
-// Bind the app to specific URLs (HTTP and HTTPS)
-builder.WebHost.UseUrls("http://localhost:5000","https://localhost:5001");
+// Bind the app to all network interfaces so the service is reachable from
+// the host and other containers. Avoid binding to HTTPS here because a
+// developer certificate is not always available in containers or CI.
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
 // Register a ConnectionMultiplexer for Redis. It will connect to the address in
 // the `REDIS_CONNECTION` environment variable or fall back to localhost:6379.
