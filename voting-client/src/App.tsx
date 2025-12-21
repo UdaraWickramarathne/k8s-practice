@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useEffect, useState } from 'react'
+import{ useEffect, useState } from 'react'
 
 type Option = { id: string; label: string; emoji: string }
 
@@ -7,6 +7,9 @@ const OPTIONS: Option[] = [
   { id: 'cat', label: 'Cat', emoji: '🐱' },
   { id: 'dog', label: 'Dog', emoji: '🐶' },
 ]
+
+// API base URL - update this to match your backend
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 function App() {
   const [selected, setSelected] = useState<string>(OPTIONS[0].id)
@@ -19,6 +22,8 @@ function App() {
     }
   })
   const [voted, setVoted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     try {
@@ -26,11 +31,32 @@ function App() {
     } catch {}
   }, [counts])
 
-  const total = Object.values(counts).reduce((a, b) => a + b, 0)
+  const handleVote = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/votes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ choice: selected }),
+      })
 
-  const vote = () => {
-    setCounts((prev) => ({ ...prev, [selected]: (prev[selected] || 0) + 1 }))
-    setVoted(true)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to record vote')
+      }
+
+      // Update local counts after successful vote
+      setCounts((prev) => ({ ...prev, [selected]: (prev[selected] || 0) + 1 }))
+      setVoted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to record vote')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const reset = () => {
@@ -62,6 +88,7 @@ function App() {
                 role="listitem"
                 aria-pressed={selected === opt.id}
                 title={opt.label}
+                disabled={loading}
               >
                 <span className="emoji" aria-hidden>{opt.emoji}</span>
                 <span className="label">{opt.label}</span>
@@ -70,14 +97,20 @@ function App() {
             </div>
 
             <div className="actions">
-              <button className="vote-btn" onClick={vote} aria-label={`Vote for ${selected}`}>
-                Vote
+              <button 
+                className="vote-btn" 
+                onClick={handleVote} 
+                disabled={loading}
+                aria-label={`Vote for ${selected}`}
+              >
+                {loading ? 'Voting...' : 'Vote'}
               </button>
               <button className="reset-btn" onClick={reset} aria-hidden={!voted}>
                 Reset
               </button>
             </div>
 
+            {error && <div className="error" role="alert" aria-live="assertive">{error}</div>}
             {voted && <div className="confirm" role="status" aria-live="polite">Thanks — your vote was recorded.</div>}
           </div>
         </section>
