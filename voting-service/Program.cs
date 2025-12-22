@@ -2,12 +2,9 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
-// Register MVC controllers so attribute-routed controllers work
 builder.Services.AddControllers();
-// Add CORS policy for local frontend during development
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalDev", policy =>

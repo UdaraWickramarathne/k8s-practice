@@ -21,7 +21,7 @@ app.use(express.static("public"));
 
 // Health check endpoint
 app.get("/health", (_req: Request, res: Response) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+  res.json({ status: "ok", data: "Voting result service is healthy", timestamp: new Date().toISOString() });
 });
 
 // Root endpoint
