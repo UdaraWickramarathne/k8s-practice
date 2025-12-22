@@ -29,12 +29,6 @@ jobs:
             voting-client:
               - 'voting-client/**'
 
-      - name: Create .env file for build
-        if: matrix.service.name == 'voting-client' && matrix.service.changed == 'true'
-        working-directory: voting-client
-        run: |
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env
-
   build-and-push:
     needs: detect-changes
     runs-on: ubuntu-latest
@@ -65,6 +59,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create .env file for build
+        if: matrix.service.name == 'voting-client' && matrix.service.changed == 'true'
+        working-directory: voting-client
+        run: |
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env
 
       - name: Build and push image
         if: matrix.service.changed == 'true'
