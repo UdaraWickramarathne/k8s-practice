@@ -1,0 +1,71 @@
+name: Build & Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      voting_service: ${{ steps.filter.outputs.voting_service }}
+      voting_result: ${{ steps.filter.outputs.voting_result }}
+      voting_ui: ${{ steps.filter.outputs.voting_ui }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect changed services
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            voting_service:
+              - 'voting-service/**'
+            voting_result:
+              - 'voting-result/**'
+            voting_ui:
+              - 'voting-client/**'
+
+  build-and-push:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - name: voting-service
+            path: voting-service
+            changed: ${{ needs.detect-changes.outputs.voting_service }}
+          - name: voting-result
+            path: voting-result
+            changed: ${{ needs.detect-changes.outputs.voting_result }}
+          - name: voting-client
+            path: voting-client
+            changed: ${{ needs.detect-changes.outputs.voting_ui }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Skip unchanged service
+        if: matrix.service.changed != 'true'
+        run: echo "No changes for ${{ matrix.service.name }}"
+
+      - name: Login to Docker Hub
+        if: matrix.service.changed == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        if: matrix.service.changed == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service.path }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service.name }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service.name }}:${{ github.sha }}
