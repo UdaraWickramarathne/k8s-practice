@@ -17,12 +17,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env file for build
-        if: matrix.service.name == 'voting-client' && matrix.service.changed == 'true'
-        working-directory: voting-client
-        run: |
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env
-
       - name: Detect changed services
         uses: dorny/paths-filter@v3
         id: filter
@@ -34,6 +28,12 @@ jobs:
               - 'voting-result/**'
             voting-client:
               - 'voting-client/**'
+
+      - name: Create .env file for build
+        if: matrix.service.name == 'voting-client' && matrix.service.changed == 'true'
+        working-directory: voting-client
+        run: |
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env
 
   build-and-push:
     needs: detect-changes
