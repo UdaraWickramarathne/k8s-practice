@@ -1,5 +1,7 @@
 import './App.css'
 import{ useEffect, useState } from 'react'
+import { getEnv } from './config/env';
+
 
 type Option = { id: string; label: string; emoji: string }
 
@@ -8,8 +10,8 @@ const OPTIONS: Option[] = [
   { id: 'dog', label: 'Dog', emoji: '🐶' },
 ]
 
-// API base URL - update this to match your backend
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const { VITE_API_URL} = getEnv();
+
 
 function App() {
   const [selected, setSelected] = useState<string>(OPTIONS[0].id)
@@ -36,7 +38,7 @@ function App() {
     setError(null)
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/votes`, {
+      const response = await fetch(`${VITE_API_URL}/api/v1/votes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

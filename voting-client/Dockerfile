@@ -12,5 +12,10 @@ RUN npm run build
 FROM nginx:alpine AS runtime
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Copy entrypoint that generates runtime env file and then starts nginx
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 80
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

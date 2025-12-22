@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: voting-client
-          image: your-dockerhub-username/voting-client:latest
+          image: udarawick/voting-client:latest
           ports:
             - containerPort: 80
           envFrom:
