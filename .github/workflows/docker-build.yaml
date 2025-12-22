@@ -11,7 +11,7 @@ jobs:
     outputs:
       voting_service: ${{ steps.filter.outputs.voting_service }}
       voting_result: ${{ steps.filter.outputs.voting_result }}
-      voting_ui: ${{ steps.filter.outputs.voting_ui }}
+      voting-client: ${{ steps.filter.outputs.voting-client }}
 
     steps:
       - name: Checkout code
@@ -32,7 +32,7 @@ jobs:
               - 'voting-service/**'
             voting_result:
               - 'voting-result/**'
-            voting_ui:
+            voting-client:
               - 'voting-client/**'
 
   build-and-push:
@@ -49,7 +49,7 @@ jobs:
             changed: ${{ needs.detect-changes.outputs.voting_result }}
           - name: voting-client
             path: voting-client
-            changed: ${{ needs.detect-changes.outputs.voting_ui }}
+            changed: ${{ needs.detect-changes.outputs.voting-client }}
 
     steps:
       - name: Checkout code
