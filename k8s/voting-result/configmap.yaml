@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: voting-result-config
+  labels:
+    app: voting-result
+data:
+  PORT: "3000"
+  REDIS_HOST: "voting-redis"

@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: voting-service
+  name: voting-client
   labels:
-    app: voting-service
+    app: voting-client
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: voting-service
+      app: voting-client
   template:
     metadata:
       labels:
-        app: voting-service
+        app: voting-client
     spec:
       containers:
-        - name: voting-service
-          image: udarawick/voting-service:latest
+        - name: voting-client
+          image: your-dockerhub-username/voting-client:latest
           ports:
             - containerPort: 80
           envFrom:
             - configMapRef:
-                name: voting-service-config
+                name: voting-client-config

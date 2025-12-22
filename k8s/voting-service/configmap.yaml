@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: voting-result-config
+  labels:
+    app: voting-result
+data:
+  REDIS_CONNECTION: "voting-redis:6379"

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voting-result
+  labels:
+    app: voting-result
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: voting-result
+  template:
+    metadata:
+      labels:
+        app: voting-result
+    spec:
+      containers:
+        - name: voting-result
+          image: udarawick/voting-result:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: voting-result-config
