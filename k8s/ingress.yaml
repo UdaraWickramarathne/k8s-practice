@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: voting-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # Voting Client (React)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: voting-client
+                port:
+                  number: 80
+
+          # Voting Service (ASP.NET Core)
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: voting-service
+                port:
+                  number: 80
+
+          # Voting Result Service (Express)
+          - path: /results
+            pathType: Prefix
+            backend:
+              service:
+                name: voting-result
+                port:
+                  number: 3000

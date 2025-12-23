@@ -5,4 +5,4 @@ metadata:
   labels:
     app: voting-client
 data:
-  VITE_API_URL: "http://voting-service"
+  VITE_API_URL: "/api"

@@ -72,7 +72,7 @@ function App() {
       <header className="hero">
         <div className="hero-inner">
           <h1>Voting Client</h1>
-          <p className="subtitle">Choose your favorite and make it count.</p>
+          <p className="subtitle">Choose your favorite pet and make it count.</p>
         </div>
       </header>
 
