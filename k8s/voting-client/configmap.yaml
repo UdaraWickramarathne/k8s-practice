@@ -5,4 +5,4 @@ metadata:
   labels:
     app: voting-client
 data:
-  VITE_API_URL: "/api"
+  VITE_API_URL: "" # Frontend serve from same origin as backend
