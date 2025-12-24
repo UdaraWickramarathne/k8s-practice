@@ -24,7 +24,7 @@
       <div style="font-size:18px; color:#334155">No votes yet — waiting for the first vote…</div>
       <div style="margin-top:8px; color:#64748b; font-size:13px">The chart will appear here when votes are recorded.</div>
     </div>
-    <div id="meta">Source: <code>/api/votes/counts</code></div>
+    <div id="meta">Source: <code>/results/api/votes/counts</code></div>
     <button id="refresh">Refresh</button>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -39,7 +39,7 @@
 
       async function fetchCounts() {
         try {
-          const res = await fetch('/api/votes/counts');
+          const res = await fetch('api/votes/counts');
           if (!res.ok) throw new Error('Network response not ok');
           return await res.json();
         } catch (err) {
@@ -109,7 +109,7 @@
       render();
 
       // Replace polling with Server-Sent Events (SSE) for real-time updates
-      const es = new EventSource('/events');
+      const es = new EventSource('events');
       es.addEventListener('counts', e => {
         try {
           const counts = JSON.parse(e.data);
